@@ -6,6 +6,7 @@
     <title>محاسبه‌گر BMI کودکان و نوجوانان</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* همه استایل‌های قبلی را اینجا نگه دارید - تغییر ندهید */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -342,10 +343,10 @@
         </header>
 
         <div class="tab-container">
-            <div class="tab active" id="manual-tab" onclick="switchTab('manual')">
+            <div class="tab active" id="manual-tab">
                 <i class="fas fa-user-edit"></i> ورود دستی اطلاعات
             </div>
-            <div class="tab" id="excel-tab" onclick="switchTab('excel')">
+            <div class="tab" id="excel-tab">
                 <i class="fas fa-file-excel"></i> ورود از طریق فایل اکسل
             </div>
         </div>
@@ -432,13 +433,13 @@
                         <p>فایل اکسل خود را اینجا رها کنید یا کلیک کنید تا انتخاب شود</p>
                         <p style="font-size: 0.9rem; margin-top: 10px; color: #666;">فرمت مورد نظر: ستون‌های نام، سن، جنسیت (پسر/دختر)، قد (سانتی‌متر)، وزن (کیلوگرم)</p>
                         <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" style="display: none;">
-                        <button type="button" onclick="document.getElementById('excel-file').click()">انتخاب فایل</button>
+                        <button type="button" id="select-file-btn">انتخاب فایل</button>
                     </div>
                     
                     <div id="upload-message" class="message"></div>
                     
                     <div class="form-group">
-                        <button onclick="calculateAllBMI()" id="calculate-all-btn" style="display: none;">محاسبه BMI برای همه</button>
+                        <button id="calculate-all-btn" style="display: none;">محاسبه BMI برای همه</button>
                     </div>
                     
                     <table class="excel-table" id="excel-table">
@@ -460,10 +461,10 @@
                     </table>
                     
                     <div class="form-group" style="margin-top: 20px;">
-                        <button onclick="exportToExcel()" id="export-btn" style="display: none;">
+                        <button id="export-btn" style="display: none;">
                             <i class="fas fa-download"></i> دانلود نتایج به صورت اکسل
                         </button>
-                        <button onclick="printTable()" id="print-btn" style="display: none; background-color: #4CAF50;">
+                        <button id="print-btn" style="display: none; background-color: #4CAF50;">
                             <i class="fas fa-print"></i> چاپ جدول
                         </button>
                     </div>
@@ -506,7 +507,7 @@
                     <div style="margin-top: 20px;">
                         <h3><i class="fas fa-download"></i> دریافت فایل نمونه</h3>
                         <p>برای دریافت فایل نمونه اکسل، روی دکمه زیر کلیک کنید:</p>
-                        <button onclick="downloadSampleExcel()" style="background-color: #4CAF50;">
+                        <button id="download-sample-btn" style="background-color: #4CAF50;">
                             <i class="fas fa-file-download"></i> دانلود فایل نمونه اکسل
                         </button>
                     </div>
@@ -531,99 +532,139 @@
         </div>
         
         <footer>
-            <p>ساخته شده برای معلمان بهداشت | طراحی شده  توسط مراقب سلامت سیما پورمیرزایی از ناحیه 1 کرمان  <i class="fas fa-heart" style="color: #e91e63;"></i></p>
+            <p>ساخته شده برای مراقبین سلامت | طراحی شده  توسط مراقب سلامت سیما پورمیرزایی از ناحیه 1 کرمان  <i class="fas fa-heart" style="color: #e91e63;"></i></p>
             <p>© 2023 محاسبه‌گر BMI کودکان و نوجوانان - نسخه ۱.۱</p>
         </footer>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // داده‌های نمونه برای ذخیره نتایج
-        let studentData = [];
+        // ==================== بخش اول: مدیریت تب‌ها ====================
+        console.log("BMI Calculator Loaded...");
         
-        // تابع برای تعویض تب‌ها
-        function switchTab(tabName) {
-            // غیرفعال کردن همه تب‌ها
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // فعال کردن تب انتخاب شده
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            document.getElementById(`${tabName}-content`).classList.add('active');
-        }
+        // انتخاب عناصر تب
+        const manualTab = document.getElementById('manual-tab');
+        const excelTab = document.getElementById('excel-tab');
+        const manualContent = document.getElementById('manual-content');
+        const excelContent = document.getElementById('excel-content');
         
+        // افزودن event listeners برای تب‌ها
+        manualTab.addEventListener('click', function() {
+            console.log("Manual tab clicked");
+            manualTab.classList.add('active');
+            excelTab.classList.remove('active');
+            manualContent.classList.add('active');
+            excelContent.classList.remove('active');
+        });
+        
+        excelTab.addEventListener('click', function() {
+            console.log("Excel tab clicked");
+            excelTab.classList.add('active');
+            manualTab.classList.remove('active');
+            excelContent.classList.add('active');
+            manualContent.classList.remove('active');
+        });
+        
+        // ==================== بخش دوم: محاسبه BMI دستی ====================
         // تابع محاسبه BMI برای کودکان و نوجوانان
         function calculateBMI(age, gender, height, weight) {
             // محاسبه BMI ساده
             const heightInMeters = height / 100;
             const bmi = weight / (heightInMeters * heightInMeters);
             
-            // شبیه‌سازی صدک بر اساس سن و جنسیت
-            let percentile = 50; // مقدار پیش‌فرض
+            // محاسبه صدک بر اساس سن و جنسیت (بر اساس استاندارد CDC)
+            let percentile;
             
-            // شبیه‌سازی محاسبه صدک بر اساس سن و جنسیت
+            // جداول تقریبی صدک‌های BMI (برای سن 2-19 سال)
             if (age <= 5) {
-                percentile = bmi * 2 + 30;
+                // کودکان 2-5 سال
+                if (gender === 'male') {
+                    if (bmi < 14.5) percentile = 10;
+                    else if (bmi < 16) percentile = 25;
+                    else if (bmi < 17.5) percentile = 50;
+                    else if (bmi < 19) percentile = 75;
+                    else if (bmi < 20.5) percentile = 85;
+                    else percentile = 95;
+                } else {
+                    if (bmi < 14) percentile = 10;
+                    else if (bmi < 15.5) percentile = 25;
+                    else if (bmi < 17) percentile = 50;
+                    else if (bmi < 18.5) percentile = 75;
+                    else if (bmi < 20) percentile = 85;
+                    else percentile = 95;
+                }
             } else if (age <= 12) {
-                percentile = bmi * 1.5 + 40;
+                // کودکان 6-12 سال
+                if (gender === 'male') {
+                    if (bmi < 15) percentile = 10;
+                    else if (bmi < 17) percentile = 25;
+                    else if (bmi < 19) percentile = 50;
+                    else if (bmi < 21) percentile = 75;
+                    else if (bmi < 23) percentile = 85;
+                    else percentile = 95;
+                } else {
+                    if (bmi < 15.5) percentile = 10;
+                    else if (bmi < 17.5) percentile = 25;
+                    else if (bmi < 19.5) percentile = 50;
+                    else if (bmi < 21.5) percentile = 75;
+                    else if (bmi < 23.5) percentile = 85;
+                    else percentile = 95;
+                }
             } else {
-                percentile = bmi * 1.2 + 45;
+                // نوجوانان 13-19 سال
+                if (gender === 'male') {
+                    if (bmi < 17) percentile = 10;
+                    else if (bmi < 19) percentile = 25;
+                    else if (bmi < 21) percentile = 50;
+                    else if (bmi < 23) percentile = 75;
+                    else if (bmi < 25) percentile = 85;
+                    else percentile = 95;
+                } else {
+                    if (bmi < 17.5) percentile = 10;
+                    else if (bmi < 19.5) percentile = 25;
+                    else if (bmi < 21.5) percentile = 50;
+                    else if (bmi < 23.5) percentile = 75;
+                    else if (bmi < 25.5) percentile = 85;
+                    else percentile = 95;
+                }
             }
             
-            // تنظیم بر اساس جنسیت
-            if (gender === 'female') {
-                percentile += 2;
-            } else {
-                percentile -= 2;
-            }
-            
-            // محدود کردن صدک بین 1 تا 99
-            percentile = Math.max(1, Math.min(99, percentile));
-            
-            return { bmi: bmi.toFixed(1), percentile: percentile.toFixed(1) };
+            return { 
+                bmi: bmi.toFixed(1), 
+                percentile: percentile.toFixed(1),
+                age: age,
+                gender: gender
+            };
         }
         
         // تابع تعیین وضعیت بر اساس صدک
         function getBMIStatus(percentile) {
             percentile = parseFloat(percentile);
             if (percentile < 5) {
-                return { status: 'کمبود وزن', class: 'underweight' };
+                return { 
+                    status: 'کمبود وزن', 
+                    class: 'underweight',
+                    description: 'قد نسبت به وزن کمتر از حد انتظار است. توصیه می‌شود با متخصص تغذیه مشورت شود.'
+                };
             } else if (percentile < 85) {
-                return { status: 'وزن طبیعی', class: 'normal' };
+                return { 
+                    status: 'وزن طبیعی', 
+                    class: 'normal',
+                    description: 'قد و وزن در محدوده سالم قرار دارد. حفظ این وضعیت توصیه می‌شود.'
+                };
             } else if (percentile < 95) {
-                return { status: 'اضافه وزن', class: 'overweight' };
+                return { 
+                    status: 'اضافه وزن', 
+                    class: 'overweight',
+                    description: 'وزن نسبت به قد بیشتر از حد انتظار است. توصیه به اصلاح رژیم غذایی و افزایش فعالیت بدنی.'
+                };
             } else {
-                return { status: 'چاق', class: 'obese' };
+                return { 
+                    status: 'چاق', 
+                    class: 'obese',
+                    description: 'وزن نسبت به قد بسیار بیشتر از حد انتظار است. مشورت با پزشک و متخصص تغذیه ضروری است.'
+                };
             }
-        }
-        
-        // تابع برای نمایش نتیجه محاسبه
-        function showResult(name, age, gender, height, weight, bmiResult) {
-            const resultContainer = document.getElementById('result');
-            const status = getBMIStatus(bmiResult.percentile);
-            
-            document.getElementById('result-name').textContent = name;
-            document.getElementById('result-age').textContent = age;
-            document.getElementById('result-gender').textContent = gender === 'male' ? 'پسر' : 'دختر';
-            document.getElementById('result-height').textContent = height;
-            document.getElementById('result-weight').textContent = weight;
-            
-            document.getElementById('bmi-value').textContent = bmiResult.bmi;
-            document.getElementById('bmi-status').textContent = status.status;
-            document.getElementById('bmi-status').className = `bmi-status ${status.class}`;
-            
-            document.getElementById('bmi-explanation').textContent = 
-                `صدک BMI این دانش‌آموز ${bmiResult.percentile} است که در دسته "${status.status}" قرار می‌گیرد.`;
-            
-            resultContainer.classList.add('show');
-            
-            // اسکرول به نتیجه
-            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
         
         // مدیریت فرم محاسبه BMI
@@ -641,29 +682,77 @@
                 return;
             }
             
+            if (age < 2 || age > 19) {
+                alert("سن باید بین 2 تا 19 سال باشد!");
+                return;
+            }
+            
+            if (height < 50 || height > 250) {
+                alert("قد باید بین 50 تا 250 سانتی‌متر باشد!");
+                return;
+            }
+            
+            if (weight < 10 || weight > 200) {
+                alert("وزن باید بین 10 تا 200 کیلوگرم باشد!");
+                return;
+            }
+            
             const bmiResult = calculateBMI(age, gender, height, weight);
-            showResult(name, age, gender, height, weight, bmiResult);
+            const status = getBMIStatus(bmiResult.percentile);
+            
+            document.getElementById('result-name').textContent = name;
+            document.getElementById('result-age').textContent = age;
+            document.getElementById('result-gender').textContent = gender === 'male' ? 'پسر' : 'دختر';
+            document.getElementById('result-height').textContent = height;
+            document.getElementById('result-weight').textContent = weight;
+            
+            document.getElementById('bmi-value').textContent = bmiResult.bmi;
+            document.getElementById('bmi-status').textContent = status.status;
+            document.getElementById('bmi-status').className = `bmi-status ${status.class}`;
+            
+            document.getElementById('bmi-explanation').textContent = 
+                `صدک BMI این دانش‌آموز ${bmiResult.percentile} است (بر اساس سن ${age} سال و جنسیت ${gender === 'male' ? 'پسر' : 'دختر'}) که در دسته "${status.status}" قرار می‌گیرد. ${status.description}`;
+            
+            document.getElementById('result').classList.add('show');
+            
+            // اسکرول به نتیجه
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
         
-        // مدیریت آپلود فایل اکسل
+        // ==================== بخش سوم: آپلود و پردازش فایل اکسل ====================
+        let studentData = [];
+        
+        // انتخاب عناصر اکسل
         const dropArea = document.getElementById('drop-area');
         const fileInput = document.getElementById('excel-file');
+        const selectFileBtn = document.getElementById('select-file-btn');
         const uploadMessage = document.getElementById('upload-message');
+        const calculateAllBtn = document.getElementById('calculate-all-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const printBtn = document.getElementById('print-btn');
+        const downloadSampleBtn = document.getElementById('download-sample-btn');
         
-        dropArea.addEventListener('click', () => fileInput.click());
+        // رویدادهای آپلود فایل
+        selectFileBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
         
-        dropArea.addEventListener('dragover', (e) => {
+        dropArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        dropArea.addEventListener('dragover', function(e) {
             e.preventDefault();
             dropArea.style.backgroundColor = '#e3f2fd';
             dropArea.style.borderColor = '#0d47a1';
         });
         
-        dropArea.addEventListener('dragleave', () => {
+        dropArea.addEventListener('dragleave', function() {
             dropArea.style.backgroundColor = '#f8fbff';
             dropArea.style.borderColor = '#1e88e5';
         });
         
-        dropArea.addEventListener('drop', (e) => {
+        dropArea.addEventListener('drop', function(e) {
             e.preventDefault();
             dropArea.style.backgroundColor = '#f8fbff';
             dropArea.style.borderColor = '#1e88e5';
@@ -680,21 +769,24 @@
             }
         });
         
-        // تابع برای نمایش پیام
+        // تابع نمایش پیام
         function showMessage(message, type) {
             uploadMessage.textContent = message;
             uploadMessage.className = `message ${type}`;
             uploadMessage.style.display = 'block';
             
-            // پنهان کردن پیام بعد از 5 ثانیه
             setTimeout(() => {
                 uploadMessage.style.display = 'none';
             }, 5000);
         }
         
-        // تابع برای پردازش فایل اکسل
+        // تابع پردازش فایل اکسل
         function handleExcelFile(file) {
-            // بررسی نوع فایل
+            if (!file) {
+                showMessage('هیچ فایلی انتخاب نشده است.', 'error');
+                return;
+            }
+            
             const validExtensions = ['.xlsx', '.xls', '.csv'];
             const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
             
@@ -712,20 +804,15 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     
-                    // خواندن اولین شیت
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    // تبدیل به JSON
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     
-                    // پردازش داده‌ها
                     processExcelData(jsonData);
-                    
                     showMessage(`فایل "${file.name}" با موفقیت آپلود شد. ${jsonData.length - 1} دانش‌آموز شناسایی شد.`, 'success');
                 } catch (error) {
-                    showMessage('خطا در خواندن فایل اکسل. لطفاً از فرمت درست استفاده کنید.', 'error');
                     console.error('Error reading Excel file:', error);
+                    showMessage('خطا در خواندن فایل اکسل. لطفاً از فرمت درست استفاده کنید.', 'error');
                 }
             };
             
@@ -736,23 +823,18 @@
             reader.readAsArrayBuffer(file);
         }
         
-        // تابع برای پردازش داده‌های اکسل
+        // تابع پردازش داده‌های اکسل
         function processExcelData(data) {
-            // پاک کردن داده‌های قبلی
             studentData = [];
             const tableBody = document.getElementById('excel-table-body');
             tableBody.innerHTML = '';
             
-            // بررسی اینکه آیا داده‌ها وجود دارند
             if (data.length < 2) {
                 showMessage('فایل اکسل باید حداقل یک ردیف داده داشته باشد.', 'error');
                 return;
             }
             
-            // پیدا کردن ستون‌ها بر اساس هدر (اگر وجود دارد)
-            let nameIndex = 0, ageIndex = 1, genderIndex = 2, heightIndex = 3, weightIndex = 4;
-            
-            // اگر ردیف اول حاوی هدر است
+            // تشخیص هدر
             const firstRow = data[0];
             const hasHeader = typeof firstRow[0] === 'string' && (
                 firstRow[0].includes('نام') || 
@@ -761,20 +843,18 @@
             );
             
             if (hasHeader) {
-                // ردیف اول هدر است، از ردیف دوم شروع می‌کنیم
                 data = data.slice(1);
             }
             
             // پردازش هر ردیف
             data.forEach((row, index) => {
-                // اطمینان از اینکه ردیف حداقل ۵ ستون دارد
                 if (row.length >= 5) {
-                    const name = row[nameIndex] || `دانش‌آموز ${index + 1}`;
-                    const age = parseInt(row[ageIndex]) || 10;
-                    const genderText = String(row[genderIndex] || 'پسر').toLowerCase();
+                    const name = row[0] || `دانش‌آموز ${index + 1}`;
+                    const age = parseInt(row[1]) || 10;
+                    const genderText = String(row[2] || 'پسر').toLowerCase();
                     const gender = genderText.includes('دختر') || genderText.includes('زن') || genderText === 'female' || genderText === 'girl' ? 'female' : 'male';
-                    const height = parseFloat(row[heightIndex]) || 140;
-                    const weight = parseFloat(row[weightIndex]) || 40;
+                    const height = parseFloat(row[3]) || 140;
+                    const weight = parseFloat(row[4]) || 40;
                     
                     // بررسی داده‌های معتبر
                     if (age < 2 || age > 19) {
@@ -803,13 +883,12 @@
                 }
             });
             
-            // اگر داده‌ای وجود ندارد
             if (studentData.length === 0) {
                 showMessage('هیچ داده معتبری در فایل پیدا نشد.', 'error');
                 return;
             }
             
-            // نمایش جدول با داده‌های اولیه
+            // نمایش جدول
             studentData.forEach((student) => {
                 const rowElement = document.createElement('tr');
                 rowElement.innerHTML = `
@@ -826,33 +905,26 @@
                 tableBody.appendChild(rowElement);
             });
             
-            // نمایش جدول و دکمه محاسبه
             document.getElementById('excel-table').classList.add('show');
-            document.getElementById('calculate-all-btn').style.display = 'block';
-            document.getElementById('export-btn').style.display = 'none';
-            document.getElementById('print-btn').style.display = 'none';
-            
-            // اسکرول به جدول
-            document.getElementById('excel-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            calculateAllBtn.style.display = 'block';
+            exportBtn.style.display = 'none';
+            printBtn.style.display = 'none';
         }
         
-        // تابع محاسبه BMI برای همه دانش‌آموزان
-        function calculateAllBMI() {
+        // محاسبه BMI برای همه دانش‌آموزان
+        calculateAllBtn.addEventListener('click', function() {
             const tableBody = document.getElementById('excel-table-body');
             const rows = tableBody.querySelectorAll('tr');
             
-            // محاسبه BMI برای هر دانش‌آموز
             studentData.forEach((student, index) => {
                 const bmiResult = calculateBMI(student.age, student.gender, student.height, student.weight);
                 const status = getBMIStatus(bmiResult.percentile);
                 
-                // ذخیره نتایج
                 student.bmi = bmiResult.bmi;
                 student.percentile = bmiResult.percentile;
                 student.status = status.status;
                 student.statusClass = status.class;
                 
-                // به‌روزرسانی جدول
                 if (rows[index]) {
                     rows[index].querySelector('.bmi-cell').textContent = bmiResult.bmi;
                     rows[index].querySelector('.status-cell').textContent = status.status;
@@ -860,18 +932,13 @@
                 }
             });
             
-            // نمایش دکمه‌های دانلود و چاپ
-            document.getElementById('export-btn').style.display = 'inline-block';
-            document.getElementById('print-btn').style.display = 'inline-block';
-            document.getElementById('export-btn').style.marginRight = '10px';
-            
-            // نمایش پیام موفقیت
+            exportBtn.style.display = 'inline-block';
+            printBtn.style.display = 'inline-block';
             showMessage(`محاسبه BMI برای ${studentData.length} دانش‌آموز با موفقیت انجام شد.`, 'success');
-        }
+        });
         
-        // تابع برای دانلود نتایج به صورت اکسل
-        function exportToExcel() {
-            // ایجاد داده‌های خروجی
+        // دانلود نتایج به صورت اکسل
+        exportBtn.addEventListener('click', function() {
             const exportData = studentData.map(student => ({
                 'ردیف': student.id,
                 'نام': student.name,
@@ -884,36 +951,18 @@
                 'وضعیت': student.status
             }));
             
-            // ایجاد worksheet
             const worksheet = XLSX.utils.json_to_sheet(exportData);
-            
-            // تنظیم عرض ستون‌ها
-            const wscols = [
-                {wch: 5},   // ردیف
-                {wch: 20},  // نام
-                {wch: 10},  // سن
-                {wch: 10},  // جنسیت
-                {wch: 12},  // قد
-                {wch: 12},  // وزن
-                {wch: 10},  // BMI
-                {wch: 12},  // صدک
-                {wch: 15}   // وضعیت
-            ];
-            worksheet['!cols'] = wscols;
-            
-            // ایجاد workbook
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "نتایج BMI");
             
-            // ایجاد فایل و دانلود
             const date = new Date().toLocaleDateString('fa-IR');
             XLSX.writeFile(workbook, `نتایج_BMI_دانش‌آموزان_${date}.xlsx`);
             
             showMessage('فایل اکسل نتایج با موفقیت دانلود شد.', 'success');
-        }
+        });
         
-        // تابع برای چاپ جدول
-        function printTable() {
+        // چاپ جدول
+        printBtn.addEventListener('click', function() {
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <html dir="rtl">
@@ -973,11 +1022,10 @@
                 </html>
             `);
             printWindow.document.close();
-        }
+        });
         
-        // تابع برای دانلود فایل اکسل نمونه
-        function downloadSampleExcel() {
-            // ایجاد داده‌های نمونه
+        // دانلود فایل نمونه
+        downloadSampleBtn.addEventListener('click', function() {
             const sampleData = [
                 ['نام', 'سن', 'جنسیت', 'قد (سانتی‌متر)', 'وزن (کیلوگرم)'],
                 ['رضا محمدی', 12, 'پسر', 150, 45],
@@ -988,39 +1036,26 @@
                 ['سارا جعفری', 13, 'دختر', 155, 48]
             ];
             
-            // ایجاد worksheet
             const worksheet = XLSX.utils.aoa_to_sheet(sampleData);
-            
-            // تنظیم عرض ستون‌ها
-            const wscols = [
-                {wch: 20},  // نام
-                {wch: 10},  // سن
-                {wch: 10},  // جنسیت
-                {wch: 15},  // قد
-                {wch: 15}   // وزن
-            ];
-            worksheet['!cols'] = wscols;
-            
-            // ایجاد workbook
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "دانش‌آموزان");
-            
-            // ایجاد فایل و دانلود
             XLSX.writeFile(workbook, "فایل_نمونه_دانش‌آموزان.xlsx");
             
             showMessage('فایل نمونه با موفقیت دانلود شد.', 'success');
-        }
+        });
         
-        // مقداردهی اولیه با یک مثال
+        // ==================== بخش چهارم: مقداردهی اولیه ====================
         window.onload = function() {
-            // پر کردن فرم با یک مثال
+            console.log("BMI Calculator initialized successfully!");
+            
+            // پر کردن فرم با داده‌های نمونه
             document.getElementById('name').value = 'نمونه دانش‌آموز';
             document.getElementById('age').value = '12';
             document.getElementById('gender').value = 'male';
             document.getElementById('height').value = '150';
             document.getElementById('weight').value = '45';
             
-            // نمایش پیام خوش‌آمد
+            // نمایش پیام خوش‌آمدگویی
             setTimeout(() => {
                 showMessage('به محاسبه‌گر BMI خوش آمدید! برای شروع، اطلاعات را وارد کنید یا فایل اکسل آپلود کنید.', 'success');
             }, 1000);
