@@ -411,11 +411,12 @@
                     <p>برای کودکان و نوجوانان، BMI بر اساس سن و جنسیت تفسیر می‌شود:</p>
                     
                     <div style="margin-top: 20px;">
-                        <div class="bmi-status underweight" style="margin-bottom: 10px;">کمبود وزن: صدک کمتر از ۵</div>
-                        <div class="bmi-status normal" style="margin-bottom: 10px;">وزن طبیعی: صدک بین ۵ تا ۸۵</div>
-                        <div class="bmi-status overweight" style="margin-bottom: 10px;">اضافه وزن: صدک بین ۸۵ تا ۹۵</div>
-                        <div class="bmi-status obese">چاق: صدک بالای ۹۵</div>
-                    </div>
+                    	<div class="bmi-status underweight" style="margin-bottom: 10px;">لاغری شدید: صدک کمتر از ۰.۱</div>
+    			<div class="bmi-status underweight" style="margin-bottom: 10px;">لاغری: صدک بین ۰.۱ تا ۵</div>
+    			<div class="bmi-status normal" style="margin-bottom: 10px;">وزن طبیعی: صدک بین ۵ تا ۸۵</div>
+    			<div class="bmi-status overweight" style="margin-bottom: 10px;">اضافه وزن: صدک بین ۸۵ تا ۹۵</div>
+    			<div class="bmi-status obese">چاقی: صدک بالای ۹۵</div>
+		    </div>
                     
                     <div style="margin-top: 25px;">
                         <p><strong>نکته:</strong> این محاسبه‌گر بر اساس استانداردهای CDC طراحی شده و جایگزین تشخیص پزشک نیست.</p>
@@ -567,105 +568,126 @@
         
         // ==================== بخش دوم: محاسبه BMI دستی ====================
         // تابع محاسبه BMI برای کودکان و نوجوانان
-        function calculateBMI(age, gender, height, weight) {
-            // محاسبه BMI ساده
-            const heightInMeters = height / 100;
-            const bmi = weight / (heightInMeters * heightInMeters);
-            
-            // محاسبه صدک بر اساس سن و جنسیت (بر اساس استاندارد CDC)
-            let percentile;
-            
-            // جداول تقریبی صدک‌های BMI (برای سن 2-19 سال)
-            if (age <= 5) {
-                // کودکان 2-5 سال
-                if (gender === 'male') {
-                    if (bmi < 14.5) percentile = 10;
-                    else if (bmi < 16) percentile = 25;
-                    else if (bmi < 17.5) percentile = 50;
-                    else if (bmi < 19) percentile = 75;
-                    else if (bmi < 20.5) percentile = 85;
-                    else percentile = 95;
-                } else {
-                    if (bmi < 14) percentile = 10;
-                    else if (bmi < 15.5) percentile = 25;
-                    else if (bmi < 17) percentile = 50;
-                    else if (bmi < 18.5) percentile = 75;
-                    else if (bmi < 20) percentile = 85;
-                    else percentile = 95;
-                }
-            } else if (age <= 12) {
-                // کودکان 6-12 سال
-                if (gender === 'male') {
-                    if (bmi < 15) percentile = 10;
-                    else if (bmi < 17) percentile = 25;
-                    else if (bmi < 19) percentile = 50;
-                    else if (bmi < 21) percentile = 75;
-                    else if (bmi < 23) percentile = 85;
-                    else percentile = 95;
-                } else {
-                    if (bmi < 15.5) percentile = 10;
-                    else if (bmi < 17.5) percentile = 25;
-                    else if (bmi < 19.5) percentile = 50;
-                    else if (bmi < 21.5) percentile = 75;
-                    else if (bmi < 23.5) percentile = 85;
-                    else percentile = 95;
-                }
+        // تابع محاسبه BMI برای کودکان و نوجوانان
+function calculateBMI(age, gender, height, weight) {
+    // محاسبه BMI ساده
+    const heightInMeters = height / 100;
+    const bmi = weight / (heightInMeters * heightInMeters);
+    
+    // ======== محاسبه صدک جدید ========
+    let percentile;
+    
+    // برای BMIهای خیلی پایین، بدون در نظر گرفتن سن و جنسیت
+    if (bmi < 10) {
+        percentile = 0.01; // خیلی پایین - لاغری شدید
+    } 
+    else if (bmi < 12) {
+        percentile = 0.05; // لاغری شدید
+    }
+    else if (bmi < 13) {
+        percentile = 1.0; // لاغری
+    }
+    else if (bmi < 14) {
+        percentile = 2.5; // لاغری
+    }
+    else {
+        // برای BMIهای معمولی از جدول قبلی استفاده می‌کنیم
+        if (age <= 5) {
+            if (gender === 'male') {
+                if (bmi < 14.5) percentile = 5;
+                else if (bmi < 16) percentile = 25;
+                else if (bmi < 17.5) percentile = 50;
+                else if (bmi < 19) percentile = 75;
+                else if (bmi < 20.5) percentile = 85;
+                else percentile = 95;
             } else {
-                // نوجوانان 13-19 سال
-                if (gender === 'male') {
-                    if (bmi < 17) percentile = 10;
-                    else if (bmi < 19) percentile = 25;
-                    else if (bmi < 21) percentile = 50;
-                    else if (bmi < 23) percentile = 75;
-                    else if (bmi < 25) percentile = 85;
-                    else percentile = 95;
-                } else {
-                    if (bmi < 17.5) percentile = 10;
-                    else if (bmi < 19.5) percentile = 25;
-                    else if (bmi < 21.5) percentile = 50;
-                    else if (bmi < 23.5) percentile = 75;
-                    else if (bmi < 25.5) percentile = 85;
-                    else percentile = 95;
-                }
+                if (bmi < 14) percentile = 5;
+                else if (bmi < 15.5) percentile = 25;
+                else if (bmi < 17) percentile = 50;
+                else if (bmi < 18.5) percentile = 75;
+                else if (bmi < 20) percentile = 85;
+                else percentile = 95;
             }
-            
-            return { 
-                bmi: bmi.toFixed(1), 
-                percentile: percentile.toFixed(1),
-                age: age,
-                gender: gender
-            };
+        } else if (age <= 12) {
+            if (gender === 'male') {
+                if (bmi < 15) percentile = 5;
+                else if (bmi < 17) percentile = 25;
+                else if (bmi < 19) percentile = 50;
+                else if (bmi < 21) percentile = 75;
+                else if (bmi < 23) percentile = 85;
+                else percentile = 95;
+            } else {
+                if (bmi < 15.5) percentile = 5;
+                else if (bmi < 17.5) percentile = 25;
+                else if (bmi < 19.5) percentile = 50;
+                else if (bmi < 21.5) percentile = 75;
+                else if (bmi < 23.5) percentile = 85;
+                else percentile = 95;
+            }
+        } else {
+            if (gender === 'male') {
+                if (bmi < 17) percentile = 5;
+                else if (bmi < 19) percentile = 25;
+                else if (bmi < 21) percentile = 50;
+                else if (bmi < 23) percentile = 75;
+                else if (bmi < 25) percentile = 85;
+                else percentile = 95;
+            } else {
+                if (bmi < 17.5) percentile = 5;
+                else if (bmi < 19.5) percentile = 25;
+                else if (bmi < 21.5) percentile = 50;
+                else if (bmi < 23.5) percentile = 75;
+                else if (bmi < 25.5) percentile = 85;
+                else percentile = 95;
+            }
         }
+    }
+    
+    return { 
+        bmi: bmi.toFixed(1), 
+        percentile: percentile.toFixed(1),
+        age: age,
+        gender: gender
+    };
+}
         
         // تابع تعیین وضعیت بر اساس صدک
         function getBMIStatus(percentile) {
-            percentile = parseFloat(percentile);
-            if (percentile < 5) {
-                return { 
-                    status: 'کمبود وزن', 
-                    class: 'underweight',
-                    description: 'قد نسبت به وزن کمتر از حد انتظار است. توصیه می‌شود با متخصص تغذیه مشورت شود.'
-                };
-            } else if (percentile < 85) {
-                return { 
-                    status: 'وزن طبیعی', 
-                    class: 'normal',
-                    description: 'قد و وزن در محدوده سالم قرار دارد. حفظ این وضعیت توصیه می‌شود.'
-                };
-            } else if (percentile < 95) {
-                return { 
-                    status: 'اضافه وزن', 
-                    class: 'overweight',
-                    description: 'وزن نسبت به قد بیشتر از حد انتظار است. توصیه به اصلاح رژیم غذایی و افزایش فعالیت بدنی.'
-                };
-            } else {
-                return { 
-                    status: 'چاق', 
-                    class: 'obese',
-                    description: 'وزن نسبت به قد بسیار بیشتر از حد انتظار است. مشورت با پزشک و متخصص تغذیه ضروری است.'
-                };
-            }
-        }
+    percentile = parseFloat(percentile);
+    
+    // **تغییر مهم: مرزها را دقیق‌تر کردم**
+    if (percentile < 0.1) {
+        return { 
+            status: 'لاغری شدید', 
+            class: 'underweight',
+            description: 'قد نسبت به وزن بسیار کمتر از حد انتظار است. مشورت فوری با پزشک و متخصص تغذیه ضروری است.'
+        };
+    } else if (percentile < 5) {
+        return { 
+            status: 'لاغری', 
+            class: 'underweight',
+            description: 'قد نسبت به وزن کمتر از حد انتظار است. توصیه می‌شود با متخصص تغذیه مشورت شود.'
+        };
+    } else if (percentile < 85) {
+        return { 
+            status: 'وزن طبیعی', 
+            class: 'normal',
+            description: 'قد و وزن در محدوده سالم قرار دارد. حفظ این وضعیت توصیه می‌شود.'
+        };
+    } else if (percentile < 95) {
+        return { 
+            status: 'اضافه وزن', 
+            class: 'overweight',
+            description: 'وزن نسبت به قد بیشتر از حد انتظار است. توصیه به اصلاح رژیم غذایی و افزایش فعالیت بدنی.'
+        };
+    } else {
+        return { 
+            status: 'چاقی', 
+            class: 'obese',
+            description: 'وزن نسبت به قد بسیار بیشتر از حد انتظار است. مشورت با پزشک و متخصص تغذیه ضروری است.'
+        };
+    }
+}
         
         // مدیریت فرم محاسبه BMI
         document.getElementById('bmi-form').addEventListener('submit', function(e) {
