@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه‌گر BMI کودکان و نوجوانان</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* همه استایل‌های قبلی را اینجا نگه دارید - تغییر ندهید */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f7ff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e88e5, #0d47a1);
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-out;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ffcc00;
+        }
+
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            min-width: 300px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .card h2 {
+            color: #0d47a1;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e3f2fd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            color: #1e88e5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #1e88e5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.2);
+        }
+
+        button {
+            background-color: #1e88e5;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #0d47a1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(13, 71, 161, 0.2);
+        }
+
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #e3f2fd;
+            display: none;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .bmi-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .bmi-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .underweight { background-color: #fff3cd; color: #856404; }
+        .normal { background-color: #d4edda; color: #155724; }
+        .overweight { background-color: #f8d7da; color: #721c24; }
+        .obese { background-color: #f5c6cb; color: #721c24; }
+
+        .excel-upload {
+            border: 3px dashed #1e88e5;
+            padding: 30px;
+            text-align: center;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            background-color: #f8fbff;
+            transition: all 0.3s;
+        }
+
+        .excel-upload:hover {
+            background-color: #e3f2fd;
+        }
+
+        .excel-upload i {
+            font-size: 3rem;
+            color: #1e88e5;
+            margin-bottom: 15px;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .excel-table.show {
+            display: table;
+        }
+
+        .excel-table th, .excel-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .excel-table th {
+            background-color: #1e88e5;
+            color: white;
+        }
+
+        .excel-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .excel-table tr:hover {
+            background-color: #e3f2fd;
+        }
+
+        .instructions {
+            background-color: #fff8e1;
+            border-right: 5px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .instructions h3 {
+            color: #ff9800;
+            margin-bottom: 15px;
+        }
+
+        .instructions ul {
+            padding-right: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background-color: #1e88e5;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .animation-area {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .animation-area i {
+            font-size: 4rem;
+            color: #1e88e5;
+            animation: pulse 2s infinite;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <h1>محاسبه‌گر BMI کودکان و نوجوانان</h1>
+            <p>ابزاری ساده برای محاسبه شاخص توده بدنی دانش‌آموزان با در نظر گرفتن سن و جنسیت</p>
+        </header>
+
+        <div class="tab-container">
+            <div class="tab active" id="manual-tab">
+                <i class="fas fa-user-edit"></i> ورود دستی اطلاعات
+            </div>
+            <div class="tab" id="excel-tab">
+                <i class="fas fa-file-excel"></i> ورود از طریق فایل اکسل
+            </div>
+        </div>
+
+        <div class="main-container">
+            <div class="tab-content active" id="manual-content">
+                <div class="card">
+                    <h2><i class="fas fa-calculator"></i> محاسبه BMI انفرادی</h2>
+                    <form id="bmi-form">
+                        <div class="form-group">
+                            <label for="name">نام دانش‌آموز:</label>
+                            <input type="text" id="name" placeholder="نام دانش‌آموز را وارد کنید" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="age">سن (سال):</label>
+                            <input type="number" id="age" min="2" max="19" placeholder="مثلاً 10" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="gender">جنسیت:</label>
+                            <select id="gender" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="male">پسر</option>
+                                <option value="female">دختر</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="height">قد (سانتی‌متر):</label>
+                            <input type="number" id="height" min="50" max="250" placeholder="مثلاً 145" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="weight">وزن (کیلوگرم):</label>
+                            <input type="number" id="weight" min="10" max="200" step="0.1" placeholder="مثلاً 45.5" required>
+                        </div>
+                        
+                        <button type="submit">محاسبه BMI</button>
+                    </form>
+                    
+                    <div class="result-container" id="result">
+                        <h3>نتیجه محاسبه BMI</h3>
+                        <p><strong>نام:</strong> <span id="result-name"></span></p>
+                        <p><strong>سن:</strong> <span id="result-age"></span> سال</p>
+                        <p><strong>جنسیت:</strong> <span id="result-gender"></span></p>
+                        <p><strong>قد:</strong> <span id="result-height"></span> سانتی‌متر</p>
+                        <p><strong>وزن:</strong> <span id="result-weight"></span> کیلوگرم</p>
+                        
+                        <div class="bmi-value" id="bmi-value">0</div>
+                        <div class="bmi-status" id="bmi-status">وضعیت</div>
+                        
+                        <p id="bmi-explanation"></p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="animation-area">
+                        <i class="fas fa-child"></i>
+                    </div>
+                    <h2><i class="fas fa-chart-line"></i> راهنمای تفسیر BMI</h2>
+                    <p>برای کودکان و نوجوانان، BMI بر اساس سن و جنسیت تفسیر می‌شود:</p>
+                    
+                    <div style="margin-top: 20px;">
+                    	<div class="bmi-status underweight" style="margin-bottom: 10px;">لاغری شدید: صدک کمتر از ۰.۱</div>
+    			<div class="bmi-status underweight" style="margin-bottom: 10px;">لاغری: صدک بین ۰.۱ تا ۵</div>
+    			<div class="bmi-status normal" style="margin-bottom: 10px;">وزن طبیعی: صدک بین ۵ تا ۸۵</div>
+    			<div class="bmi-status overweight" style="margin-bottom: 10px;">اضافه وزن: صدک بین ۸۵ تا ۹۵</div>
+    			<div class="bmi-status obese">چاقی: صدک بالای ۹۵</div>
+		    </div>
+                    
+                    <div style="margin-top: 25px;">
+                        <p><strong>نکته:</strong> این محاسبه‌گر بر اساس استانداردهای CDC طراحی شده و جایگزین تشخیص پزشک نیست.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="excel-content">
+                <div class="card">
+                    <h2><i class="fas fa-file-upload"></i> آپلود فایل اکسل</h2>
+                    <p>فایل اکسل خود را با فرمت زیر آپلود کنید:</p>
+                    
+                    <div class="excel-upload" id="drop-area">
+                        <i class="fas fa-file-excel"></i>
+                        <p>فایل اکسل خود را اینجا رها کنید یا کلیک کنید تا انتخاب شود</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px; color: #666;">فرمت مورد نظر: ستون‌های نام، سن، جنسیت (پسر/دختر)، قد (سانتی‌متر)، وزن (کیلوگرم)</p>
+                        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" style="display: none;">
+                        <button type="button" id="select-file-btn">انتخاب فایل</button>
+                    </div>
+                    
+                    <div id="upload-message" class="message"></div>
+                    
+                    <div class="form-group">
+                        <button id="calculate-all-btn" style="display: none;">محاسبه BMI برای همه</button>
+                    </div>
+                    
+                    <table class="excel-table" id="excel-table">
+                        <thead>
+                            <tr>
+                                <th>ردیف</th>
+                                <th>نام</th>
+                                <th>سن (سال)</th>
+                                <th>جنسیت</th>
+                                <th>قد (سانتی‌متر)</th>
+                                <th>وزن (کیلوگرم)</th>
+                                <th>BMI</th>
+                                <th>وضعیت</th>
+                            </tr>
+                        </thead>
+                        <tbody id="excel-table-body">
+                            <!-- داده‌ها اینجا نمایش داده می‌شوند -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <button id="export-btn" style="display: none;">
+                            <i class="fas fa-download"></i> دانلود نتایج به صورت اکسل
+                        </button>
+                        <button id="print-btn" style="display: none; background-color: #4CAF50;">
+                            <i class="fas fa-print"></i> چاپ جدول
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2><i class="fas fa-info-circle"></i> راهنمای آپلود فایل اکسل</h2>
+                    <p>برای استفاده از این بخش، لطفاً فایل اکسل خود را با ساختار زیر آماده کنید:</p>
+                    
+                    <div style="overflow-x: auto; margin-top: 20px;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #1e88e5; color: white;">
+                                    <th style="padding: 12px; text-align: center;">نام</th>
+                                    <th style="padding: 12px; text-align: center;">سن</th>
+                                    <th style="padding: 12px; text-align: center;">جنسیت</th>
+                                    <th style="padding: 12px; text-align: center;">قد</th>
+                                    <th style="padding: 12px; text-align: center;">وزن</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">رضا محمدی</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">12</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">پسر</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">150</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">45</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">فاطمه احمدی</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">10</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">دختر</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">140</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">38</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h3><i class="fas fa-download"></i> دریافت فایل نمونه</h3>
+                        <p>برای دریافت فایل نمونه اکسل، روی دکمه زیر کلیک کنید:</p>
+                        <button id="download-sample-btn" style="background-color: #4CAF50;">
+                            <i class="fas fa-file-download"></i> دانلود فایل نمونه اکسل
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 10px;">
+                        <p><strong>توجه مهم:</strong> سایت اطلاعات شما را روی سرور ذخیره نمی‌کند. تمام محاسبات فقط روی کامپیوتر شما انجام می‌شود.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-lightbulb"></i> راهنمای استفاده</h3>
+            <ul>
+                <li><strong>برای دیدن سایت:</strong> فقط این فایل را در مرورگر باز کنید (روی فایل دابل کلیک کنید)</li>
+                <li><strong>برای محاسبه انفرادی:</strong> از بخش "ورود دستی اطلاعات" استفاده کنید</li>
+                <li><strong>برای محاسبه گروهی:</strong> از بخش "ورود از طریق فایل اکسل" استفاده کنید</li>
+                <li><strong>آپلود فایل اکسل:</strong> فایل را انتخاب کنید یا بکشید و در کادر رها کنید</li>
+                <li>پس از آپلود فایل اکسل، روی دکمه "محاسبه BMI برای همه" کلیک کنید</li>
+                <li>پس از محاسبات، می‌توانید نتایج را چاپ یا به صورت اکسل دانلود کنید</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p>ساخته شده برای مراقبین سلامت | طراحی شده  توسط مراقب سلامت سیما پورمیرزایی از ناحیه 1 کرمان  <i class="fas fa-heart" style="color: #e91e63;"></i></p>
+            <p>© 2023 محاسبه‌گر BMI کودکان و نوجوانان - نسخه ۱.۱</p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // ==================== بخش اول: مدیریت تب‌ها ====================
+        console.log("BMI Calculator Loaded...");
+        
+        // انتخاب عناصر تب
+        const manualTab = document.getElementById('manual-tab');
+        const excelTab = document.getElementById('excel-tab');
+        const manualContent = document.getElementById('manual-content');
+        const excelContent = document.getElementById('excel-content');
+        
+        // افزودن event listeners برای تب‌ها
+        manualTab.addEventListener('click', function() {
+            console.log("Manual tab clicked");
+            manualTab.classList.add('active');
+            excelTab.classList.remove('active');
+            manualContent.classList.add('active');
+            excelContent.classList.remove('active');
+        });
+        
+        excelTab.addEventListener('click', function() {
+            console.log("Excel tab clicked");
+            excelTab.classList.add('active');
+            manualTab.classList.remove('active');
+            excelContent.classList.add('active');
+            manualContent.classList.remove('active');
+        });
+        
+        // ==================== بخش دوم: محاسبه BMI دستی ====================
+        // تابع محاسبه BMI برای کودکان و نوجوانان
+        // تابع محاسبه BMI برای کودکان و نوجوانان
+function calculateBMI(age, gender, height, weight) {
+    // محاسبه BMI ساده
+    const heightInMeters = height / 100;
+    const bmi = weight / (heightInMeters * heightInMeters);
+    
+    // ======== محاسبه صدک جدید ========
+    let percentile;
+    
+    // برای BMIهای خیلی پایین، بدون در نظر گرفتن سن و جنسیت
+    if (bmi < 10) {
+        percentile = 0.01; // خیلی پایین - لاغری شدید
+    } 
+    else if (bmi < 12) {
+        percentile = 0.05; // لاغری شدید
+    }
+    else if (bmi < 13) {
+        percentile = 1.0; // لاغری
+    }
+    else if (bmi < 14) {
+        percentile = 2.5; // لاغری
+    }
+    else {
+        // برای BMIهای معمولی از جدول قبلی استفاده می‌کنیم
+        if (age <= 5) {
+            if (gender === 'male') {
+                if (bmi < 14.5) percentile = 5;
+                else if (bmi < 16) percentile = 25;
+                else if (bmi < 17.5) percentile = 50;
+                else if (bmi < 19) percentile = 75;
+                else if (bmi < 20.5) percentile = 85;
+                else percentile = 95;
+            } else {
+                if (bmi < 14) percentile = 5;
+                else if (bmi < 15.5) percentile = 25;
+                else if (bmi < 17) percentile = 50;
+                else if (bmi < 18.5) percentile = 75;
+                else if (bmi < 20) percentile = 85;
+                else percentile = 95;
+            }
+        } else if (age <= 12) {
+            if (gender === 'male') {
+                if (bmi < 15) percentile = 5;
+                else if (bmi < 17) percentile = 25;
+                else if (bmi < 19) percentile = 50;
+                else if (bmi < 21) percentile = 75;
+                else if (bmi < 23) percentile = 85;
+                else percentile = 95;
+            } else {
+                if (bmi < 15.5) percentile = 5;
+                else if (bmi < 17.5) percentile = 25;
+                else if (bmi < 19.5) percentile = 50;
+                else if (bmi < 21.5) percentile = 75;
+                else if (bmi < 23.5) percentile = 85;
+                else percentile = 95;
+            }
+        } else {
+            if (gender === 'male') {
+                if (bmi < 17) percentile = 5;
+                else if (bmi < 19) percentile = 25;
+                else if (bmi < 21) percentile = 50;
+                else if (bmi < 23) percentile = 75;
+                else if (bmi < 25) percentile = 85;
+                else percentile = 95;
+            } else {
+                if (bmi < 17.5) percentile = 5;
+                else if (bmi < 19.5) percentile = 25;
+                else if (bmi < 21.5) percentile = 50;
+                else if (bmi < 23.5) percentile = 75;
+                else if (bmi < 25.5) percentile = 85;
+                else percentile = 95;
+            }
+        }
+    }
+    
+    return { 
+        bmi: bmi.toFixed(1), 
+        percentile: percentile.toFixed(1),
+        age: age,
+        gender: gender
+    };
+}
+        
+        // تابع تعیین وضعیت بر اساس صدک
+        function getBMIStatus(percentile) {
+    percentile = parseFloat(percentile);
+    
+    // **تغییر مهم: مرزها را دقیق‌تر کردم**
+    if (percentile < 0.1) {
+        return { 
+            status: 'لاغری شدید', 
+            class: 'underweight',
+            description: 'قد نسبت به وزن بسیار کمتر از حد انتظار است. مشورت فوری با پزشک و متخصص تغذیه ضروری است.'
+        };
+    } else if (percentile < 5) {
+        return { 
+            status: 'لاغری', 
+            class: 'underweight',
+            description: 'قد نسبت به وزن کمتر از حد انتظار است. توصیه می‌شود با متخصص تغذیه مشورت شود.'
+        };
+    } else if (percentile < 85) {
+        return { 
+            status: 'وزن طبیعی', 
+            class: 'normal',
+            description: 'قد و وزن در محدوده سالم قرار دارد. حفظ این وضعیت توصیه می‌شود.'
+        };
+    } else if (percentile < 95) {
+        return { 
+            status: 'اضافه وزن', 
+            class: 'overweight',
+            description: 'وزن نسبت به قد بیشتر از حد انتظار است. توصیه به اصلاح رژیم غذایی و افزایش فعالیت بدنی.'
+        };
+    } else {
+        return { 
+            status: 'چاقی', 
+            class: 'obese',
+            description: 'وزن نسبت به قد بسیار بیشتر از حد انتظار است. مشورت با پزشک و متخصص تغذیه ضروری است.'
+        };
+    }
+}
+        
+        // مدیریت فرم محاسبه BMI
+        document.getElementById('bmi-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const age = parseInt(document.getElementById('age').value);
+            const gender = document.getElementById('gender').value;
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            if (!name || !age || !gender || !height || !weight) {
+                alert("لطفاً همه فیلدها را پر کنید!");
+                return;
+            }
+            
+            if (age < 2 || age > 19) {
+                alert("سن باید بین 2 تا 19 سال باشد!");
+                return;
+            }
+            
+            if (height < 50 || height > 250) {
+                alert("قد باید بین 50 تا 250 سانتی‌متر باشد!");
+                return;
+            }
+            
+            if (weight < 10 || weight > 200) {
+                alert("وزن باید بین 10 تا 200 کیلوگرم باشد!");
+                return;
+            }
+            
+            const bmiResult = calculateBMI(age, gender, height, weight);
+            const status = getBMIStatus(bmiResult.percentile);
+            
+            document.getElementById('result-name').textContent = name;
+            document.getElementById('result-age').textContent = age;
+            document.getElementById('result-gender').textContent = gender === 'male' ? 'پسر' : 'دختر';
+            document.getElementById('result-height').textContent = height;
+            document.getElementById('result-weight').textContent = weight;
+            
+            document.getElementById('bmi-value').textContent = bmiResult.bmi;
+            document.getElementById('bmi-status').textContent = status.status;
+            document.getElementById('bmi-status').className = `bmi-status ${status.class}`;
+            
+            document.getElementById('bmi-explanation').textContent = 
+                `صدک BMI این دانش‌آموز ${bmiResult.percentile} است (بر اساس سن ${age} سال و جنسیت ${gender === 'male' ? 'پسر' : 'دختر'}) که در دسته "${status.status}" قرار می‌گیرد. ${status.description}`;
+            
+            document.getElementById('result').classList.add('show');
+            
+            // اسکرول به نتیجه
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        
+        // ==================== بخش سوم: آپلود و پردازش فایل اکسل ====================
+        let studentData = [];
+        
+        // انتخاب عناصر اکسل
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('excel-file');
+        const selectFileBtn = document.getElementById('select-file-btn');
+        const uploadMessage = document.getElementById('upload-message');
+        const calculateAllBtn = document.getElementById('calculate-all-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const printBtn = document.getElementById('print-btn');
+        const downloadSampleBtn = document.getElementById('download-sample-btn');
+        
+        // رویدادهای آپلود فایل
+        selectFileBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        dropArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        dropArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropArea.style.backgroundColor = '#e3f2fd';
+            dropArea.style.borderColor = '#0d47a1';
+        });
+        
+        dropArea.addEventListener('dragleave', function() {
+            dropArea.style.backgroundColor = '#f8fbff';
+            dropArea.style.borderColor = '#1e88e5';
+        });
+        
+        dropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropArea.style.backgroundColor = '#f8fbff';
+            dropArea.style.borderColor = '#1e88e5';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleExcelFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files.length) {
+                handleExcelFile(this.files[0]);
+            }
+        });
+        
+        // تابع نمایش پیام
+        function showMessage(message, type) {
+            uploadMessage.textContent = message;
+            uploadMessage.className = `message ${type}`;
+            uploadMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                uploadMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // تابع پردازش فایل اکسل
+        function handleExcelFile(file) {
+            if (!file) {
+                showMessage('هیچ فایلی انتخاب نشده است.', 'error');
+                return;
+            }
+            
+            const validExtensions = ['.xlsx', '.xls', '.csv'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(fileExtension)) {
+                showMessage('لطفاً فقط فایل‌های اکسل (xlsx, xls, csv) آپلود کنید.', 'error');
+                return;
+            }
+            
+            showMessage('در حال پردازش فایل... لطفاً صبر کنید.', 'success');
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    processExcelData(jsonData);
+                    showMessage(`فایل "${file.name}" با موفقیت آپلود شد. ${jsonData.length - 1} دانش‌آموز شناسایی شد.`, 'success');
+                } catch (error) {
+                    console.error('Error reading Excel file:', error);
+                    showMessage('خطا در خواندن فایل اکسل. لطفاً از فرمت درست استفاده کنید.', 'error');
+                }
+            };
+            
+            reader.onerror = function() {
+                showMessage('خطا در خواندن فایل. لطفاً دوباره تلاش کنید.', 'error');
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // تابع پردازش داده‌های اکسل
+        function processExcelData(data) {
+            studentData = [];
+            const tableBody = document.getElementById('excel-table-body');
+            tableBody.innerHTML = '';
+            
+            if (data.length < 2) {
+                showMessage('فایل اکسل باید حداقل یک ردیف داده داشته باشد.', 'error');
+                return;
+            }
+            
+            // تشخیص هدر
+            const firstRow = data[0];
+            const hasHeader = typeof firstRow[0] === 'string' && (
+                firstRow[0].includes('نام') || 
+                firstRow[0].includes('Name') || 
+                firstRow[0].includes('name')
+            );
+            
+            if (hasHeader) {
+                data = data.slice(1);
+            }
+            
+            // پردازش هر ردیف
+            data.forEach((row, index) => {
+                if (row.length >= 5) {
+                    const name = row[0] || `دانش‌آموز ${index + 1}`;
+                    const age = parseInt(row[1]) || 10;
+                    const genderText = String(row[2] || 'پسر').toLowerCase();
+                    const gender = genderText.includes('دختر') || genderText.includes('زن') || genderText === 'female' || genderText === 'girl' ? 'female' : 'male';
+                    const height = parseFloat(row[3]) || 140;
+                    const weight = parseFloat(row[4]) || 40;
+                    
+                    // بررسی داده‌های معتبر
+                    if (age < 2 || age > 19) {
+                        showMessage(`ردیف ${index + 1}: سن باید بین ۲ تا ۱۹ سال باشد.`, 'error');
+                        return;
+                    }
+                    
+                    if (height < 50 || height > 250) {
+                        showMessage(`ردیف ${index + 1}: قد باید بین ۵۰ تا ۲۵۰ سانتی‌متر باشد.`, 'error');
+                        return;
+                    }
+                    
+                    if (weight < 10 || weight > 200) {
+                        showMessage(`ردیف ${index + 1}: وزن باید بین ۱۰ تا ۲۰۰ کیلوگرم باشد.`, 'error');
+                        return;
+                    }
+                    
+                    studentData.push({
+                        id: index + 1,
+                        name, age, gender, height, weight,
+                        bmi: null,
+                        percentile: null,
+                        status: null,
+                        statusClass: null
+                    });
+                }
+            });
+            
+            if (studentData.length === 0) {
+                showMessage('هیچ داده معتبری در فایل پیدا نشد.', 'error');
+                return;
+            }
+            
+            // نمایش جدول
+            studentData.forEach((student) => {
+                const rowElement = document.createElement('tr');
+                rowElement.innerHTML = `
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.age}</td>
+                    <td>${student.gender === 'male' ? 'پسر' : 'دختر'}</td>
+                    <td>${student.height}</td>
+                    <td>${student.weight}</td>
+                    <td class="bmi-cell">-</td>
+                    <td class="status-cell">-</td>
+                `;
+                
+                tableBody.appendChild(rowElement);
+            });
+            
+            document.getElementById('excel-table').classList.add('show');
+            calculateAllBtn.style.display = 'block';
+            exportBtn.style.display = 'none';
+            printBtn.style.display = 'none';
+        }
+        
+        // محاسبه BMI برای همه دانش‌آموزان
+        calculateAllBtn.addEventListener('click', function() {
+            const tableBody = document.getElementById('excel-table-body');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            studentData.forEach((student, index) => {
+                const bmiResult = calculateBMI(student.age, student.gender, student.height, student.weight);
+                const status = getBMIStatus(bmiResult.percentile);
+                
+                student.bmi = bmiResult.bmi;
+                student.percentile = bmiResult.percentile;
+                student.status = status.status;
+                student.statusClass = status.class;
+                
+                if (rows[index]) {
+                    rows[index].querySelector('.bmi-cell').textContent = bmiResult.bmi;
+                    rows[index].querySelector('.status-cell').textContent = status.status;
+                    rows[index].querySelector('.status-cell').className = `status-cell ${status.class}`;
+                }
+            });
+            
+            exportBtn.style.display = 'inline-block';
+            printBtn.style.display = 'inline-block';
+            showMessage(`محاسبه BMI برای ${studentData.length} دانش‌آموز با موفقیت انجام شد.`, 'success');
+        });
+        
+        // دانلود نتایج به صورت اکسل
+        exportBtn.addEventListener('click', function() {
+            const exportData = studentData.map(student => ({
+                'ردیف': student.id,
+                'نام': student.name,
+                'سن (سال)': student.age,
+                'جنسیت': student.gender === 'male' ? 'پسر' : 'دختر',
+                'قد (سانتی‌متر)': student.height,
+                'وزن (کیلوگرم)': student.weight,
+                'BMI': student.bmi,
+                'صدک BMI': student.percentile,
+                'وضعیت': student.status
+            }));
+            
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "نتایج BMI");
+            
+            const date = new Date().toLocaleDateString('fa-IR');
+            XLSX.writeFile(workbook, `نتایج_BMI_دانش‌آموزان_${date}.xlsx`);
+            
+            showMessage('فایل اکسل نتایج با موفقیت دانلود شد.', 'success');
+        });
+        
+        // چاپ جدول
+        printBtn.addEventListener('click', function() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html dir="rtl">
+                <head>
+                    <title>چاپ نتایج BMI دانش‌آموزان</title>
+                    <style>
+                        body { font-family: Tahoma, sans-serif; margin: 20px; }
+                        h1 { color: #0d47a1; text-align: center; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+                        th { background-color: #f0f0f0; }
+                        .underweight { background-color: #fff3cd; }
+                        .normal { background-color: #d4edda; }
+                        .overweight { background-color: #f8d7da; }
+                        .obese { background-color: #f5c6cb; }
+                        @media print {
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>نتایج محاسبه BMI دانش‌آموزان</h1>
+                    <p>تاریخ: ${new Date().toLocaleDateString('fa-IR')}</p>
+                    <p>تعداد دانش‌آموزان: ${studentData.length} نفر</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ردیف</th>
+                                <th>نام</th>
+                                <th>سن</th>
+                                <th>جنسیت</th>
+                                <th>قد (سانتی‌متر)</th>
+                                <th>وزن (کیلوگرم)</th>
+                                <th>BMI</th>
+                                <th>وضعیت</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${studentData.map(student => `
+                                <tr>
+                                    <td>${student.id}</td>
+                                    <td>${student.name}</td>
+                                    <td>${student.age}</td>
+                                    <td>${student.gender === 'male' ? 'پسر' : 'دختر'}</td>
+                                    <td>${student.height}</td>
+                                    <td>${student.weight}</td>
+                                    <td>${student.bmi || '-'}</td>
+                                    <td class="${student.statusClass || ''}">${student.status || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <br>
+                    <button onclick="window.print()">چاپ</button>
+                    <button onclick="window.close()">بستن</button>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        });
+        
+        // دانلود فایل نمونه
+        downloadSampleBtn.addEventListener('click', function() {
+            const sampleData = [
+                ['نام', 'سن', 'جنسیت', 'قد (سانتی‌متر)', 'وزن (کیلوگرم)'],
+                ['رضا محمدی', 12, 'پسر', 150, 45],
+                ['فاطمه احمدی', 10, 'دختر', 140, 38],
+                ['علی کریمی', 14, 'پسر', 165, 55],
+                ['زهرا موسوی', 11, 'دختر', 145, 42],
+                ['محمد رضایی', 9, 'پسر', 135, 32],
+                ['سارا جعفری', 13, 'دختر', 155, 48]
+            ];
+            
+            const worksheet = XLSX.utils.aoa_to_sheet(sampleData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "دانش‌آموزان");
+            XLSX.writeFile(workbook, "فایل_نمونه_دانش‌آموزان.xlsx");
+            
+            showMessage('فایل نمونه با موفقیت دانلود شد.', 'success');
+        });
+        
+        // ==================== بخش چهارم: مقداردهی اولیه ====================
+        window.onload = function() {
+            console.log("BMI Calculator initialized successfully!");
+            
+            // پر کردن فرم با داده‌های نمونه
+            document.getElementById('name').value = 'نمونه دانش‌آموز';
+            document.getElementById('age').value = '12';
+            document.getElementById('gender').value = 'male';
+            document.getElementById('height').value = '150';
+            document.getElementById('weight').value = '45';
+            
+            // نمایش پیام خوش‌آمدگویی
+            setTimeout(() => {
+                showMessage('به محاسبه‌گر BMI خوش آمدید! برای شروع، اطلاعات را وارد کنید یا فایل اکسل آپلود کنید.', 'success');
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
